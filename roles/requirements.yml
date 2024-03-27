@@ -1,0 +1,10 @@
+---    
+- src: https://github.com/anaik91/ansible-roles.git
+  scm: git
+  version: main
+  name: list-user-clusters
+
+- src: https://github.com/anaik91/ansible-roles.git
+  scm: git
+  version: main
+  name: kubectl-ops
