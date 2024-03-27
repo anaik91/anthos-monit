@@ -30,13 +30,13 @@
       tags: ['anthos-ls']
       environment:
         KUBECONFIG: '{{ admin_cluster_kubeconfig }}'
-    - role: anthos-clusters-diagnostics
-      tags: ['anthos-diag']
-      environment:
-        KUBECONFIG: '{{ admin_cluster_kubeconfig }}'
-    - role: seesaw-health-check
-      vars:
-        operation: 'get seesawgroups'
-      tags: ['seesaw']
-      environment:
-        KUBECONFIG: '{{ admin_cluster_kubeconfig }}'
+    # - role: anthos-clusters-diagnostics
+    #   tags: ['anthos-diag']
+    #   environment:
+    #     KUBECONFIG: '{{ admin_cluster_kubeconfig }}'
+    # - role: seesaw-health-check
+    #   vars:
+    #     operation: 'get seesawgroups'
+    #   tags: ['seesaw']
+    #   environment:
+    #     KUBECONFIG: '{{ admin_cluster_kubeconfig }}'
