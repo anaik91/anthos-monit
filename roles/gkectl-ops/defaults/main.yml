@@ -1,0 +1,6 @@
+---
+# defaults file for anthos-health-check
+admin_cluster_kubeconfig: /home/ubuntu/kubeconfig
+user_cluster_name: ''
+diagnose_json: ''
+diagnose_json_exists: true

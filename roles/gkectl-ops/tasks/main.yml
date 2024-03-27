@@ -1,0 +1,38 @@
+---
+# tasks file for anthos-health-check
+- block:
+    - name: gkectl {{operation}}
+      shell: >
+        gkectl {{ operation }} \
+          --kubeconfig={{ admin_cluster_kubeconfig }} \
+          --cluster-name={{ user_cluster_name }} \
+          --output={{ diagnose_file }}
+      register: gkectl_op
+
+  rescue:
+    - debug:
+        msg: "gkectl {{ operation }} failed"
+
+  always:
+    - name: 'Read {{ diagnose_file }} data'
+      include_role: { name: read-file }
+      vars:
+        remote_file: '{{ diagnose_file }}'
+
+    - set_fact:
+        diagnose_json: '{{ file_content }}'
+        diagnose_json_exists: true
+      when: file_content != ""
+
+    - set_fact:
+        diagnose_json: "{{ gkectl_op.stdout }}"
+        diagnose_json_exists: false
+      when: file_content == ""
+
+    - debug:
+        msg: "{{ diagnose_json }}"
+
+    - name: Remove {{ diagnose_file }}
+      ansible.builtin.file:
+        path: '{{ diagnose_file }}'
+        state: absent

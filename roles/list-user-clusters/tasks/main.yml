@@ -1,0 +1,22 @@
+---
+# tasks file for list-user-clusters
+  - name: Fetch onpremusercluster resource
+    include_role: { name: kubectl-ops }
+    vars:
+      operation: 'get'
+      k8s_resource_type: 'onpremusercluster'
+      kubectl_args: '-A -o json'
+
+  - name: Declare user cluster array
+    set_fact:
+      user_clusters: []
+
+  - name: Filter user cluster details
+    set_fact:
+      user_clusters: "{{ user_clusters +
+                       [{ 'name': item.name,
+                          'namespace': item.namespace }] }}"
+    loop: '{{ kubectl_op.stdout | from_json | json_query("items[*].metadata")}}'
+
+  - debug:
+      msg: "{{ user_clusters }}"

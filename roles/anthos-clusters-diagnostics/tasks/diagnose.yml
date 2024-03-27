@@ -1,0 +1,55 @@
+# Copyright 2023 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+# tasks file for kubectl-ops diagnose
+  - name: 'Run gkectl diagnose on {{ item.name }}'
+    include_role: { name: gkectl-ops }
+    vars:
+      operation: 'diagnose cluster'
+      user_cluster_name: '{{ item.name }}'
+      diagnose_file: '/tmp/{{ item.name }}.json'
+
+  - name: Write json INFO log to GCP
+    include_role: { name: gcloud-write-log }
+    vars:
+      log_severity: INFO
+      log_message: '{{ diagnose_json| to_json }}'
+      log_name: '{{ anthos_log_name }}'
+    when: gkectl_op.rc == 0 and diagnose_json_exists
+
+  - name: Write text INFO log to GCP
+    include_role: { name: gcloud-write-log }
+    vars:
+      log_severity: INFO
+      log_message: '{{ diagnose_json }}'
+      log_name: '{{ anthos_log_name }}'
+      payload_type: 'text'
+    when: gkectl_op.rc == 0 and not diagnose_json_exists
+
+  - name: Write json ERROR log to GCP
+    include_role: { name: gcloud-write-log }
+    vars:
+      log_severity: ERROR
+      log_message: '{{ diagnose_json| to_json }}'
+      log_name: '{{ anthos_log_name }}'
+    when: gkectl_op.rc == 1 and diagnose_json_exists
+
+  - name: Write text ERROR log to GCP
+    include_role: { name: gcloud-write-log }
+    vars:
+      log_severity: ERROR
+      log_message: '{{ diagnose_json }}'
+      log_name: '{{ anthos_log_name }}'
+      payload_type: 'text'
+    when: gkectl_op.rc == 1 and not diagnose_json_exists

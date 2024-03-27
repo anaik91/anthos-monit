@@ -1,0 +1,15 @@
+---
+# tasks file for get-user-cluster-kubeconfig
+  - name: Fetch usercluster {{ usercluster_name }} admin secret
+    include_role: { name: kubectl-ops }
+    vars:
+      operation: 'get'
+      k8s_resource_type: 'secret'
+      k8s_resource: 'admin'
+      k8s_namespace: '{{ usercluster_name }}'
+      kubectl_args: -o json
+
+  - copy: 
+      content: >-
+        {{ kubectl_op.stdout | from_json | json_query('data."{}"'.format('admin.conf')) | b64decode }}
+      dest: '{{ kubeconfig_file }}'

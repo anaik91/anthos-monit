@@ -1,0 +1,15 @@
+---
+# tasks file for read-file
+- block:
+    - name: cat "{{ remote_file }}"
+      shell: cat "{{ remote_file }}"
+      register: file_read_op
+
+    - set_fact:
+        file_content: "{{ file_read_op.stdout }}"
+  rescue:
+    - debug:
+        msg: "{{ remote_file }} doesnt exist"
+
+    - set_fact:
+        file_content: ""

@@ -1,0 +1,4 @@
+---
+# defaults file for gcloud-ops
+payload_type: json
+log_severity: INFO

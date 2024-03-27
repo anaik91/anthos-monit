@@ -1,0 +1,22 @@
+---
+# tasks file for anthos-health-check
+- block:
+    - name: gcloud run
+      shell: >
+        gcloud logging write \
+          --payload-type={{ payload_type }} \
+          {{ log_name }} \
+          --severity={{ log_severity }} \
+          '{{ log_message }}' \
+          --project={{ project_id }} 
+      register: gcloud_op
+
+    - debug:
+        msg: "{{ gcloud_op }}"
+
+  rescue:
+    - debug:
+        msg: "gcloud log write failed"
+
+    - debug:
+        msg: "{{ gcloud_op }}"

@@ -1,0 +1,47 @@
+---
+- name: Fetch seesawgroups details
+  block:
+    - name: Fetch onpremusercluster resource
+      include_role: { name: kubectl-ops }
+      vars:
+        operation: 'get'
+        k8s_resource_type: 'seesawgroups'
+        kubectl_args: '-A -o json --kubeconfig={{ kubeconfig_file }}'
+
+    - set_fact:
+        name_ready: "{{ kubectl_op.stdout | from_json | json_query('items[*].{name: metadata.name, isReady: status.machines[*].isReady}') }}"
+
+    - debug:
+        msg: "{{ name_ready }}"
+
+- name: Check if all machines are ready
+  block:
+    - name: Initialize variable to track readiness
+      set_fact:
+        all_ready: true
+        machines: []
+
+    - name: Loop through machine info
+      when: item.isReady | select('eq', false) | list | length > 0
+      set_fact:
+        all_ready: false
+        machines: "{{ machines + [item.name] }}"
+      loop: "{{ name_ready }}"
+
+    - name: Machines are ready
+      set_fact:
+        seesaw_log_msg: "All Seesaw machines on usercluster  are ready."
+      when: all_ready
+
+    - name: All machines are not ready
+      set_fact:
+        seesaw_log_msg: "Some Seesaw machines are not ready - {{ machines }}"
+      when: not all_ready
+
+  rescue:
+    - name: Handle kubectl failure
+      debug:
+        msg: "kubectl {{ operation }} failed"
+
+    - debug:
+        msg: "{{ kubectl_output.stderr }}"
